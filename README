@@ -2,7 +2,6 @@ NAME
     Email::MIME::Creator - Email::MIME constructor for starting anew.
 
 SYNOPSIS
-      use Email::MIME;
       use Email::MIME::Creator;
       use IO::All;
 
@@ -15,7 +14,7 @@ SYNOPSIS
                   encoding     => "quoted-printable",
                   name         => "2004-financials.pdf",
               },
-              body => io( "2004-financials.pdf" )->slurp,
+              body => io( "2004-financials.pdf" )->all,
           ),
           Email::MIME->create(
               attributes => {
@@ -49,6 +48,19 @@ SYNOPSIS
       # more advanced
       $_->encoding_set( 'base64' ) for $email->parts;
   
+      # Quick multipart creation
+      my $quicky = Email::MIME->create(
+          header => [
+              From => 'my@address',
+              To   => 'your@address',
+          ],
+          parts => [
+              q[This is part one],
+              q[This is part two],
+              q[These could be binary too],
+          ],
+      );
+  
       print $email->as_string;
   
       *rcpts = *aux_rcpts = *sekrit_rcpts = sub { 'you@example.com' };
@@ -74,9 +86,15 @@ DESCRIPTION
          the header set in the "header" parameter.
 
          The "parts" parameter is a list reference containing "Email::MIME"
-         objects. "parts" takes precedence over "body", which will set this
-         part's body if assigned. So, multi part messages shold use the
-         "parts" parameter and single part messages should use "body".
+         objects. Elements of the "parts" list can also be a non-reference
+         string of data. In that case, an "Email::MIME" object will be
+         created for you. Simple checks will determine if the part is binary
+         or not, and all parts created in this fashion are encoded with
+         "base64", just in case.
+
+         "parts" takes precedence over "body", which will set this part's
+         body if assigned. So, multi part messages shold use the "parts"
+         parameter and single part messages should use "body".
 
          Back to "attributes". The hash keys correspond directly to methods
          or modifying a message from "Email::MIME::Modifier". The allowed
@@ -85,7 +103,8 @@ DESCRIPTION
          message modification.
 
 SEE ALSO
-    Email::MIME, Email::MIME::Modifier, Email::Simple::Creator, perl.
+    Email::MIME, Email::MIME::Modifier, Email::Simple::Creator, "IO::All" or
+    "File::Slurp" (for file slurping to create parts from strings), perl.
 
 AUTHOR
     Casey West, <casey@geeknest.com>.

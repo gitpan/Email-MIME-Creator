@@ -5,9 +5,9 @@ WriteMakefile (
                ABSTRACT      => "Email::MIME constructor for starting anew",
                NAME          => 'Email::MIME::Creator',
                PREREQ_PM     => {
-                                 'Email::MIME' => '1.7',
-                                 'Email::MIME::Modifier' => '1.2',
-                                 'Email::Simple' => '1.9',
+                                 'Email::MIME' => '1.82',
+                                 'Email::MIME::Modifier' => '1.42',
+                                 'Email::Simple' => '1.92',
                                  'Email::Simple::Creator' => '1.4',
                                  'Test::More' => '0.47',
                                 },

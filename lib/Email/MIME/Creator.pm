@@ -1,11 +1,28 @@
 package Email::MIME::Creator;
-# $Id: Creator.pm,v 1.3 2004/09/25 15:37:21 cwest Exp $
+# $Id: Creator.pm,v 1.4 2004/12/24 00:12:49 cwest Exp $
 use strict;
 
 use vars qw[$VERSION];
-$VERSION = (qw$Revision: 1.3 $)[1];
+$VERSION = '1.41';
 
 use base q[Email::Simple::Creator];
+use Email::MIME;
+
+sub _construct_part {
+    my ($class, $body) = @_;
+
+    my $content_type =   ($body =~ /\0/)
+                       ? 'application/x-binary'
+                       : 'text/plain';
+    
+    Email::MIME->create(
+        attributes => {
+            content_type => $content_type,
+            encoding     => 'base64', # be safe
+        },
+        body => $body,
+    );
+}
 
 package Email::MIME;
 use strict;
@@ -30,7 +47,7 @@ sub create {
     }
     $CREATOR->_add_to_header(\$header,
       Date => $CREATOR->_date_header
-    ) unless $headers{Date};
+    ) unless exists $headers{Date};
     $CREATOR->_add_to_header(\$header,
       'MIME-Version' => '1.0',
     );
@@ -46,6 +63,10 @@ sub create {
     }
 
     if ( $args{parts} && @{$args{parts}} ) {
+       foreach my $part ( @{$args{parts}} ) {
+           $part = $CREATOR->_construct_part($part)
+             unless ref($part);
+       }
        $email->parts_set( $args{parts} );
     } elsif ( exists $args{body} ) {
        $email->body_set( $args{body} );
@@ -64,7 +85,6 @@ Email::MIME::Creator - Email::MIME constructor for starting anew.
 
 =head1 SYNOPSIS
 
-  use Email::MIME;
   use Email::MIME::Creator;
   use IO::All;
 
@@ -77,7 +97,7 @@ Email::MIME::Creator - Email::MIME constructor for starting anew.
               encoding     => "quoted-printable",
               name         => "2004-financials.pdf",
           },
-          body => io( "2004-financials.pdf" )->slurp,
+          body => io( "2004-financials.pdf" )->all,
       ),
       Email::MIME->create(
           attributes => {
@@ -111,6 +131,19 @@ Email::MIME::Creator - Email::MIME constructor for starting anew.
   # more advanced
   $_->encoding_set( 'base64' ) for $email->parts;
   
+  # Quick multipart creation
+  my $quicky = Email::MIME->create(
+      header => [
+          From => 'my@address',
+          To   => 'your@address',
+      ],
+      parts => [
+          q[This is part one],
+          q[This is part two],
+          q[These could be binary too],
+      ],
+  );
+  
   print $email->as_string;
   
   *rcpts = *aux_rcpts = *sekrit_rcpts = sub { 'you@example.com' };
@@ -135,18 +168,26 @@ Email::MIME::Creator - Email::MIME constructor for starting anew.
     parts      => [ ... ],
   );
 
-This method creates a new MIME part. The C<header> parameter is a lis of headers
-to include in the message. C<attributes> is a hash of MIME attributes to assign
-to the part, and may override portions of the header set in the C<header> parameter.
+This method creates a new MIME part. The C<header> parameter is a lis of
+headers to include in the message. C<attributes> is a hash of MIME
+attributes to assign to the part, and may override portions of the
+header set in the C<header> parameter.
 
-The C<parts> parameter is a list reference containing C<Email::MIME> objects. C<parts>
-takes precedence over C<body>, which will set this part's body if assigned. So, multi
-part messages shold use the C<parts> parameter and single part messages should use C<body>.
+The C<parts> parameter is a list reference containing C<Email::MIME>
+objects. Elements of the C<parts> list can also be a non-reference
+string of data. In that case, an C<Email::MIME> object will be created
+for you. Simple checks will determine if the part is binary or not, and
+all parts created in this fashion are encoded with C<base64>, just in case.
 
-Back to C<attributes>. The hash keys correspond directly to methods or modifying a message
-from C<Email::MIME::Modifier>. The allowed keys are: content_type, charset, name, format,
-boundary, encoding, disposition, and filename. They will be mapped to C<"$attr\_set"> for
-message modification.
+C<parts> takes precedence over C<body>, which will set this part's body
+if assigned. So, multi part messages shold use the C<parts> parameter
+and single part messages should use C<body>.
+
+Back to C<attributes>. The hash keys correspond directly to methods or
+modifying a message from C<Email::MIME::Modifier>. The allowed keys are:
+content_type, charset, name, format, boundary, encoding, disposition,
+and filename. They will be mapped to C<"$attr\_set"> for message
+modification.
 
 =back
 
@@ -155,6 +196,7 @@ message modification.
 L<Email::MIME>,
 L<Email::MIME::Modifier>,
 L<Email::Simple::Creator>,
+C<IO::All> or C<File::Slurp> (for file slurping to create parts from strings),
 L<perl>.
 
 =head1 AUTHOR
