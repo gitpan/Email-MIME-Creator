@@ -1,9 +1,9 @@
 package Email::MIME::Creator;
-# $Id: Creator.pm,v 1.2 2004/07/05 19:36:57 cwest Exp $
+# $Id: Creator.pm,v 1.3 2004/09/25 15:37:21 cwest Exp $
 use strict;
 
 use vars qw[$VERSION];
-$VERSION = (qw$Revision: 1.2 $)[1];
+$VERSION = (qw$Revision: 1.3 $)[1];
 
 use base q[Email::Simple::Creator];
 
@@ -124,13 +124,13 @@ Email::MIME::Creator - Email::MIME constructor for starting anew.
 =item create
 
   my $single = Email::MIME->create(
-    headers    => [ ... ],
+    header     => [ ... ],
     attributes => { ... },
     body       => '...',
   );
   
   my $multi = Email::MIME->create(
-    headers    => [ ... ],
+    header     => [ ... ],
     attributes => { ... },
     parts      => [ ... ],
   );

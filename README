@@ -57,13 +57,13 @@ DESCRIPTION
   Methods
     create
            my $single = Email::MIME->create(
-             headers    => [ ... ],
+             header     => [ ... ],
              attributes => { ... },
              body       => '...',
            );
   
            my $multi = Email::MIME->create(
-             headers    => [ ... ],
+             header     => [ ... ],
              attributes => { ... },
              parts      => [ ... ],
            );
