@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                Email-MIME-Creator
-version:             1.453
+version:             1.454
 abstract:            Email::MIME constructor for starting anew
 license:             perl
 generated_by:        ExtUtils::MakeMaker version 6.32
