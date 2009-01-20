@@ -2,7 +2,7 @@ package Email::MIME::Creator;
 use strict;
 
 use vars qw[$VERSION];
-$VERSION = '1.454';
+$VERSION = '1.455';
 
 use base q[Email::Simple::Creator];
 use Email::MIME;
@@ -50,9 +50,22 @@ sub create {
     unless exists $headers{Date};
   $CREATOR->_add_to_header(\$header, 'MIME-Version' => '1.0',);
 
+  my %attrs = $args{attributes} ? %{ $args{attributes} } : ();
+
+  # XXX: This is awful... but if we don't do this, then Email::MIME->new will
+  # end up calling parse_content_type($self->content_type) which will mean
+  # parse_content_type(undef) which, for some reason, returns the default.
+  # It's really sort of mind-boggling.  Anyway, the default ends up being
+  # q{text/plain; charset="us-ascii"} so that if content_type is in the
+  # attributes, but not charset, then charset isn't changedand you up with
+  # something that's q{image/jpeg; charset="us-ascii"} and you look like a
+  # moron. -- rjbs, 2009-01-20
+  if (grep {exists $attrs{$_}} qw(content_type charset name format boundary)) {
+    $CREATOR->_add_to_header(\$header, 'Content-Type' => 'text/plain',);
+  }
+
   my $email = $class->new($header);
 
-  my %attrs = $args{attributes} ? %{ $args{attributes} } : ();
   foreach (
     qw[content_type charset name format boundary
     encoding
@@ -206,9 +219,9 @@ This module is maintained by the Perl Email Project.
 
 L<http://emailproject.perl.org/wiki/Email::MIME::Creator>
 
-=head1 AUTHOR
+=head1 ORIGINAL AUTHOR
 
-Casey West, <F<casey@geeknest.com>>.
+B<Do not send bug reports to>: Casey West, <F<casey@geeknest.com>>.
 
 =head1 COPYRIGHT
 
