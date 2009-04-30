@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               Email-MIME-Creator
-version:            1.455
+version:            1.456
 abstract:           Email::MIME constructor for starting anew
 author:
     - Ricardo SIGNES <rjbs@cpan.org>
@@ -8,19 +8,22 @@ license:            perl
 distribution_type:  module
 configure_requires:
     ExtUtils::MakeMaker:  0
+build_requires:
+    ExtUtils::MakeMaker:  0
 requires:
     Email::MIME:          1.82
+    Email::MIME::Encodings:  1.313
     Email::MIME::Modifier:  1.440
     Email::Simple:        1.92
     Email::Simple::Creator:  1.4
     Test::More:           0.47
 resources:
-    Repository:  http://github.com/rjbs/email-mime-creator
+    repository:  http://github.com/rjbs/email-mime-creator
 no_index:
     directory:
         - t
         - inc
-generated_by:       ExtUtils::MakeMaker version 6.48
+generated_by:       ExtUtils::MakeMaker version 6.50
 meta-spec:
     url:      http://module-build.sourceforge.net/META-spec-v1.4.html
     version:  1.4
